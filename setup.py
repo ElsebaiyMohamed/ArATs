@@ -9,21 +9,14 @@ setuptools.setup(
     author = "seba3y",
     author_email = "sebaeymohamed43@gmail.com",
     description = "speech translation",
-#     long_description = 'long_description',
-#     long_description_content_type = "text/markdown",
-    package_dir={"": '.aang'},
-    
-    
-    
-    
-    url = "https://github.com/ElsebaiyMohamed/model",
-    
+  
     classifiers = [
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     
-    packages = setuptools.find_packages(where=".aang"),
+    packages = ["torch>=1.10", "torchaudio", "torchtext", "pytorch-lightning>=1.9", "tokenizers",
+                "pyarabic"]
     python_requires = ">=3.7"
 )
