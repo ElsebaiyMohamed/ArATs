@@ -15,7 +15,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": 'aang'},
+    # package_dir={"": 'aang'},
     entry_points='''
         [console_scripts]
         aang=train:cli
