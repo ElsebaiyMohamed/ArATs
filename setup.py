@@ -9,17 +9,15 @@ setuptools.setup(
     author = "seba3y",
     author_email = "sebaeymohamed43@gmail.com",
     description = "speech translation",
-    long_description = 'long_description',
-    long_description_content_type = "text/markdown",
+#     long_description = 'long_description',
+#     long_description_content_type = "text/markdown",
     package_dir={"": '.aang'},
     
     
     
     
-    url = "package URL",
-    project_urls = {
-        "Bug Tracker": "package issues URL",
-    },
+    url = "https://github.com/ElsebaiyMohamed/model",
+    
     classifiers = [
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
