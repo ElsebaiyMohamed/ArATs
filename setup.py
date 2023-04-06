@@ -11,7 +11,7 @@ setuptools.setup(
     description = "speech translation",
     long_description = 'long_description',
     long_description_content_type = "text/markdown",
-    package_dir={"": 'aang'},
+    package_dir={"": '.aang'},
     
     
     
@@ -26,6 +26,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     
-    packages = setuptools.find_packages(where="aang"),
+    packages = setuptools.find_packages(where=".aang"),
     python_requires = ">=3.7"
 )
