@@ -15,12 +15,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    # package_dir={"": 'aang'},
+    package_dir={"": 'aang'},
     entry_points='''
         [console_scripts]
         aang=train:cli
     ''',
-    packages = setuptools.find_packages(where="aang"),#["torch", "torchaudio", "torchtext", "pytorch-lightning", "tokenizers",
-                #"pyarabic"],
+    packages = setuptools.find_packages(where="aang"),
+    install_requires=["torch>=1.13", "torchaudio", "torchtext", "pytorch-lightning>=1.9", "tokenizers",
+                "pyarabic"],
     python_requires = ">=3.7"
 )
