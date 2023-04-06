@@ -71,7 +71,10 @@ if __name__ == "__main__":
                             default_root_dir=os.getcwd())
 
     
-    trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=dev_loader)
+        trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=dev_loader)
+    else:
+        print('invalid data dir')
+    
     
     
     
