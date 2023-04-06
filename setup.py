@@ -17,6 +17,6 @@ setuptools.setup(
     ],
     
     packages = ["torch>=1.10", "torchaudio", "torchtext", "pytorch-lightning>=1.9", "tokenizers",
-                "pyarabic"]
+                "pyarabic"],
     python_requires = ">=3.7"
 )
