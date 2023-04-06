@@ -16,7 +16,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     
-    packages = ["torch", "torchaudio", "torchtext", "pytorch-lightning", "tokenizers",
-                "pyarabic"],
+    packages = setuptools.find_packages(where="aang"),#["torch", "torchaudio", "torchtext", "pytorch-lightning", "tokenizers",
+                #"pyarabic"],
     python_requires = ">=3.7"
 )
