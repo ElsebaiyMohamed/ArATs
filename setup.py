@@ -16,7 +16,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     
-    packages = ["torch>=1.10", "torchaudio", "torchtext", "pytorch-lightning>=1.9", "tokenizers",
+    packages = ["torch", "torchaudio", "torchtext", "pytorch-lightning", "tokenizers",
                 "pyarabic"],
     python_requires = ">=3.7"
 )
