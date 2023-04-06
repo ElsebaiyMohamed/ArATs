@@ -219,6 +219,15 @@
         "documentation": {}
     },
     {
+        "label": "setuptools",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "setuptools",
+        "description": "setuptools",
+        "detail": "setuptools",
+        "documentation": {}
+    },
+    {
         "label": "DDPStrategy",
         "importPath": "pytorch_lightning.strategies",
         "description": "pytorch_lightning.strategies",
@@ -241,15 +250,6 @@
         "description": "argparse",
         "isExtraImport": true,
         "detail": "argparse",
-        "documentation": {}
-    },
-    {
-        "label": "setuptools",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "setuptools",
-        "description": "setuptools",
-        "detail": "setuptools",
         "documentation": {}
     },
     {
