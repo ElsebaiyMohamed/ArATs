@@ -24,6 +24,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    print(type(args.en_json))
     if args.strategy == 'ddp':
         args.strategy = DDPStrategy(process_group_backend="nccl", start_method='fork')
         
