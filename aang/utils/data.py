@@ -82,11 +82,11 @@ class MyDataset(Dataset):
 
         en = self.en_config['tokenizer'](en, self.en_config['size'])
         en = torch.tensor(en, dtype=torch.int64)
-        return wave, en, ar
+        # return wave, en, ar
     
-        # wave, mask = self.__pad_wave(wave, mask=True)
-        # wave = wave.unfold(dimension=1, size=self.config['frame_size'], step=self.config['frame_stride']).transpose(0, 1)
-        # return (wave, mask), en, ar
+        wave, mask = self.__pad_wave(wave, mask=True)
+        wave = wave.unfold(dimension=1, size=self.config['frame_size'], step=self.config['frame_stride']).transpose(0, 1)
+        return (wave, mask), en, ar
         
 
     def __pad_wave(self, wave, mask=False):

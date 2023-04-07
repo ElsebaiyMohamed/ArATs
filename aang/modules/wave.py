@@ -72,15 +72,15 @@ class Wave2Chunk(nn.Module):
     def forward(self, waves, mask=False, training=False):
         # ensure that all chunks will be the same size
         if mask:
-            # waves, mask = waves
-            waves, mask = self.__pad_wave(waves, mask)
+            waves, mask = waves
+            # waves, mask = self.__pad_wave(waves, mask)
 
         else:
             mask = None
-            waves = self.__pad_wave(waves, mask)
+            # waves = self.__pad_wave(waves, mask)
 
 #         # convert the the wave into overlabing chunks
-        waves = waves.unfold(dimension=2, size=self.config['frame_size'], step=self.config['frame_stride']).transpose(2, 1)
+        # waves = waves.unfold(dimension=2, size=self.config['frame_size'], step=self.config['frame_stride']).transpose(2, 1)
         
         B, chunks, c, seq_len = waves.size()
         waves = waves.contiguous().view(B*chunks, c, seq_len)
