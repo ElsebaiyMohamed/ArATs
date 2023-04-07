@@ -24,7 +24,6 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    print(type(args.en_json))
     if args.strategy == 'ddp':
         args.strategy = DDPStrategy(process_group_backend="nccl", start_method='fork')
         
@@ -38,8 +37,9 @@ if __name__ == "__main__":
                       'frame_size': 30000,
                       'frame_stride': 20000,
                       'b4': 20}
-        
+        print(type(ar_config))
         train = MyDataset(os.path.join(args.data_dir, 'train'), ar_config=ar_config, en_config=en_config, wav_config=wav_config)
+        print(type(ar_config))
         dev = MyDataset(os.path.join(args.data_dir, 'dev'), ar_config=ar_config, en_config=en_config, wav_config=wav_config)
         
         train_loader = DataLoader(train, batch_size=args.batch_size, shuffle=False, 
@@ -55,8 +55,9 @@ if __name__ == "__main__":
         decoder_params  = dict(d_model=512, nhead=16, nch=16, dropout=0.5, batch_first=True, size=10)
 
         head_params     = dict(en=dict(d_model=512, voc_size=500), ar=dict(d_model=512, voc_size=500))
+        
         tokenizers      = dict(en=TokenHandler(en_config['tokenizer'], 'en'),
-                            ar=TokenHandler(en_config['tokenizer'], 'ar'))
+                               ar=TokenHandler(ar_config['tokenizer'], 'ar'))
         
         head_names      = dict(en=tokenizers['en'].get_id("<PAD>"), ar=tokenizers['ar'].get_id("<PAD>"))
         hyper_parameter = dict(wave_param=wave_param, encoder_params=encoder_params, decoder_params=decoder_params, 
