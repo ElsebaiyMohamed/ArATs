@@ -34,11 +34,11 @@ class MyDataset(Dataset):
         files   = dict()
         for f in txt_dir:
             if 'yaml' in f:
-                files['yaml'] = f
+                files['yaml'] = join(txt_dir, f)
             elif 'ar' in f:
-                files['ar'] = f
+                files['ar'] = join(txt_dir, f)
             elif 'en' in f:
-                files['en'] = f
+                files['en'] = join(txt_dir, f)
             else: None
             
         data = self.get_yaml_data(files['yaml'])
