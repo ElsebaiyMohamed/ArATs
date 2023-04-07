@@ -41,7 +41,8 @@ if __name__ == "__main__":
         train = MyDataset(os.path.join(args.data_dir, 'train'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
 
         dev = MyDataset(os.path.join(args.data_dir, 'dev'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
-        print(type(args.batch_size), args.batch_size)
+        
+        
         train_loader = DataLoader(train, batch_size=int(args.batch_size), shuffle=False, 
                                   num_workers=mp.cpu_count(), pin_memory=True, drop_last=True)
 
@@ -60,7 +61,7 @@ if __name__ == "__main__":
                                ar=TokenHandler(ar_config['tokenizer'], 'ar'))
         
         head_names      = dict(en=tokenizers['en'].get_id("<PAD>"), ar=tokenizers['ar'].get_id("<PAD>"))
-        hyper_parameter = dict(wave_param=wave_param, encoder_params=encoder_params, decoder_params=decoder_params, 
+        hyper_parameter = dict(lr=3e-3, wave_param=wave_param, encoder_params=encoder_params, decoder_params=decoder_params, 
                             head_names=head_names, head_params=head_params)
 
         model = Speech2TextArcht(**hyper_parameter)
