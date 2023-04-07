@@ -42,10 +42,10 @@ if __name__ == "__main__":
 
         dev = MyDataset(os.path.join(args.data_dir, 'dev'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
         print(type(args.batch_size), args.batch_size)
-        train_loader = DataLoader(train, batch_size=args.batch_size, shuffle=False, 
+        train_loader = DataLoader(train, batch_size=int(args.batch_size), shuffle=False, 
                                   num_workers=mp.cpu_count(), pin_memory=True, drop_last=True)
 
-        dev_loader = DataLoader(dev, batch_size=args.batch_size, shuffle=False,   
+        dev_loader = DataLoader(dev, batch_size=int(args.batch_size), shuffle=False,   
                                 num_workers=mp.cpu_count(), pin_memory=True, drop_last=True)
         
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
