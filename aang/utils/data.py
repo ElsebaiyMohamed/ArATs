@@ -54,12 +54,12 @@ class MyDataset(Dataset):
         data = data.sample(frac=1).reset_index(drop=True)
         return data
     
-    def get_yaml_data(path):
+    def get_yaml_data(self, path):
         with open(path) as f:
             data = yaml.load(f, Loader=CLoader)
             return data    
     
-    def get_text_data(path):
+    def get_text_data(self, path):
         with open(path, 'rt', encoding='utf-8', errors='ignors') as f:
             return f.readlines()
       
