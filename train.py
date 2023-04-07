@@ -38,9 +38,9 @@ if __name__ == "__main__":
                       'frame_stride': 20000,
                       'b4': 20}
         print(type(ar_config['tokenizer']))
-        train = MyDataset(os.path.join(args.data_dir, 'train'), ar_config=ar_config, en_config=en_config, wav_config=wav_config)
+        train = MyDataset(os.path.join(args.data_dir, 'train'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
         print(type(ar_config['tokenizer']))
-        dev = MyDataset(os.path.join(args.data_dir, 'dev'), ar_config=ar_config, en_config=en_config, wav_config=wav_config)
+        dev = MyDataset(os.path.join(args.data_dir, 'dev'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
         
         train_loader = DataLoader(train, batch_size=args.batch_size, shuffle=False, 
                                   num_workers=mp.cpu_count(), pin_memory=True, drop_last=True)
