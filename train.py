@@ -1,9 +1,9 @@
 import pytorch_lightning as pl
 from pytorch_lightning.strategies import DDPStrategy
 from torch.utils.data import DataLoader
-from .aang.utils.data import MyDataset
-from .aang.utils.callback import *
-from .aang.model.S2T import Speech2TextArcht
+from aang.utils.data import MyDataset
+from aang.utils.callback import *
+from aang.model.S2T import Speech2TextArcht
 
 import os
 import multiprocessing as mp
