@@ -85,7 +85,7 @@ class MyDataset(Dataset):
         # return wave, en, ar
     
         wave, mask = self.__pad_wave(wave, mask=True)
-        wave = wave.unfold(dimension=1, size=self.config['frame_size'], step=self.config['frame_stride']).transpose(0, 1)
+        wave = wave.unfold(dimension=1, size=self.wav_config['frame_size'], step=self.wav_config['frame_stride']).transpose(0, 1)
         return (wave, mask), en, ar
         
 
