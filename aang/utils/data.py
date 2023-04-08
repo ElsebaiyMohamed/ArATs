@@ -91,7 +91,7 @@ class DFMap(Dataset):
         
 
 class MuSTCDataset(pl.LightningDataModule):
-    def __init__(self, loader_config=None, **data_config):
+    def __init__(self, data_config, loader_config=None):
         super().__init__()
         self.data_config = data_config
         self.loader_config = loader_config
