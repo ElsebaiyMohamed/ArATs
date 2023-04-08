@@ -24,8 +24,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    if args.strategy == 'ddp':
-        args.strategy = DDPStrategy(process_group_backend="nccl", start_method='fork')
+    strategy = DDPStrategy(process_group_backend="nccl", start_method='fork') if str(args.strategy) == 'ddp' else 'auto'
         
     if args.data_dir is not None:
         ar_config  = {'tokenizer': args.ar_json,
@@ -70,9 +69,9 @@ if __name__ == "__main__":
                              max_epochs=args.epochs, sync_batchnorm=True, log_every_n_steps=200,
                              #callbacks=[progress_bar, ckp, pred,],# swa,],  #
                              #accumulate_grad_batches=2,
-                             strategy=str(args.strategy),
-                              enable_model_summary=True, enable_checkpointing=True, benchmark=True, 
-                            default_root_dir=os.getcwd())
+                             strategy=strategy,
+                             enable_model_summary=True, enable_checkpointing=True, benchmark=True, 
+                             default_root_dir=os.getcwd())
 
     
         trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=dev_loader)
