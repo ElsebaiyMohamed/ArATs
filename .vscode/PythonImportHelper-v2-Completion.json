@@ -432,7 +432,7 @@
         "kind": 6,
         "importPath": "aang.utils.data",
         "description": "aang.utils.data",
-        "peekOfCode": "class MuSTCDataset(pl.LightningDataModule):\n    def __init__(self, loader_config=None, **data_config):\n        self.data_config = data_config\n        self.loader_config = loader_config\n    def setup(self, stage: str):\n        self.data = self.load_from_dir(self.data_config['dir_path'])\n    def load_from_dir(self, root):\n        # split_name = root.split(os.sep)[-1]\n        split_names = ['train', 'dev']\n        final_data = dict()",
+        "peekOfCode": "class MuSTCDataset(pl.LightningDataModule):\n    def __init__(self, loader_config=None, **data_config):\n        super().__init__()\n        self.data_config = data_config\n        self.loader_config = loader_config\n    def setup(self, stage: str):\n        self.data = self.load_from_dir(self.data_config['dir_path'])\n    def load_from_dir(self, root):\n        # split_name = root.split(os.sep)[-1]\n        split_names = ['train', 'dev']",
         "detail": "aang.utils.data",
         "documentation": {}
     },
