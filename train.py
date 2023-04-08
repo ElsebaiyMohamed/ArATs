@@ -44,10 +44,10 @@ if __name__ == "__main__":
         
         
         train_loader = DataLoader(train, batch_size=int(args.batch_size), shuffle=False, 
-                                  num_workers=8, pin_memory=False, drop_last=True)
+                                  num_workers=2, pin_memory=False, drop_last=True)
 
         dev_loader = DataLoader(dev, batch_size=int(args.batch_size), shuffle=False,   
-                                num_workers=8, pin_memory=False, drop_last=True)
+                                num_workers=2, pin_memory=False, drop_last=True)
         
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
         
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         devices = args.devices if args.devices == 'auto' else int(args.devices)
         trainer = pl.Trainer(accelerator=args.accelerator, devices=devices, 
                              max_epochs=args.epochs, sync_batchnorm=True, log_every_n_steps=200,
-                             callbacks=[progress_bar, ckp, pred, swa,],  #
+                             callbacks=[progress_bar, ckp, pred,],# swa,],  #
                              accumulate_grad_batches=2,
                              strategy=args.strategy,
                               enable_model_summary=True, enable_checkpointing=True, benchmark=True, 
