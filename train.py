@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 from pytorch_lightning.strategies import DDPStrategy
 from torch.utils.data import DataLoader
-from aang.utils.data import MyDataset
+from aang.utils.data import MuSTCDataset
 from aang.utils.callback import *
 from aang.model.S2T import Speech2TextArcht
 
@@ -38,16 +38,8 @@ if __name__ == "__main__":
                       'frame_stride': 20000,
                       'b4': 20}
         
-        train = MyDataset(os.path.join(args.data_dir, 'train'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
+        datamodel = MuSTCDataset(args.data_dir, ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
 
-        dev = MyDataset(os.path.join(args.data_dir, 'dev'), ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config)
-        
-        
-        train_loader = DataLoader(train, batch_size=int(args.batch_size), shuffle=False, 
-                                  num_workers=2, pin_memory=False, drop_last=True)
-
-        dev_loader = DataLoader(dev, batch_size=int(args.batch_size), shuffle=False,   
-                                num_workers=2, pin_memory=False, drop_last=True)
         
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
         
@@ -75,7 +67,7 @@ if __name__ == "__main__":
                              default_root_dir=os.getcwd())
 
     
-        trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=dev_loader)
+        trainer.fit(model, datamodel)
     else:
         print('invalid data dir')
     

@@ -1,71 +1,35 @@
 import torch
 import torchaudio
 import torch.nn.functional as F
-from torch.utils.data import Dataset
-
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader, Dataset
 import math
 import pandas as pd
 import yaml
 from yaml import CLoader
 import os
+import numpy as np
 
 from os.path import join
 from aang.utils.lang import TokenHandler
 
+class DFMap(Dataset):
+    def __init__(self, df, ar_config: dict, en_config: dict, wav_config, **kwargs):
 
-
-class MyDataset(Dataset):
-    def __init__(self, dir_path, ar_config: dict, en_config: dict, wav_config: dict):
-        self.data       = self.load_from_dir(dir_path)
-        self.ar_config  = ar_config
-        self.en_config  = en_config
-        self.wav_config = wav_config
+        self.df = df
+        self.ar_config  = ar_config.copy()
+        self.en_config  = en_config.copy()
+        self.wav_config = wav_config.copy()
         
         self.ar_config['tokenizer'] = TokenHandler(self.ar_config['tokenizer'], 'ar')
         self.en_config['tokenizer'] = TokenHandler(self.en_config['tokenizer'], 'en')
         
         
-        
-    def load_from_dir(self, root):
-        # split_name = root.split(os.sep)[-1]
-        
-        txt_dir = os.listdir(join(root, 'txt'))
-        wav_dir = join(root, 'wav')
-        files   = dict()
-        for f in txt_dir:
-            if 'yaml' in f:
-                files['yaml'] = join(root, 'txt', f)
-            elif 'ar' in f:
-                files['ar'] = join(root, 'txt', f)
-            elif 'en' in f:
-                files['en'] = join(root, 'txt', f)
-            else: None
-            
-        data = self.get_yaml_data(files['yaml'])
-        data = pd.DataFrame.from_records(data)
-        
-        data['wav'] = data['wav'].apply(lambda x: os.path.join(wav_dir, x))
-
-        data['en'] = self.get_text_data(files['en'])
-        
-        data['ar'] = self.get_text_data(files['ar'])
-        data = data.sample(frac=1).reset_index(drop=True)
-        data = data.sample(frac=1).reset_index(drop=True)
-        data = data.sample(frac=1).reset_index(drop=True)
-        return data
+    def __len__(self):
+        return len(self.df)
     
-    def get_yaml_data(self, path):
-        with open(path) as f:
-            data = yaml.load(f, Loader=CLoader)
-            return data    
-    
-    def get_text_data(self, path):
-        with open(path, 'rt', encoding='utf-8', errors='ignors') as f:
-            return f.readlines()
-      
     def __getitem__(self, idx):
-        du, of, speaker_id, wav_path, en, ar = self.data.iloc[idx]
-
+        du, of, speaker_id, wav_path, en, ar = self.df.iloc[idx]
         of = int(of * self.wav_config['sr'])
         du = int(du * self.wav_config['sr'])
 
@@ -83,12 +47,11 @@ class MyDataset(Dataset):
         en = self.en_config['tokenizer'](en, self.en_config['size'])
         en = torch.tensor(en, dtype=torch.int64)
         # return wave, en, ar
-    
         wave, mask = self.__pad_wave(wave, mask=True)
         wave = wave.unfold(dimension=1, size=self.wav_config['frame_size'], step=self.wav_config['frame_stride']).transpose(0, 1)
         return (wave, mask), en, ar
-        
-
+    
+    
     def __pad_wave(self, wave, mask=False):
         """Only supported shapes (B, C, Wave_size) or (B, Wave_size) or (Wave_size, ) for unbatched
         """
@@ -124,10 +87,62 @@ class MyDataset(Dataset):
             mask = torch.all(mask, 1)
             return wave, mask
         return wave
+
+        
+
+class MuSTCDataset(pl.LightningDataModule):
+    def __init__(self, loader_config=None, **data_config):
+        self.data_config = data_config
+        self.loader_config = loader_config
+        
+        
+    def setup(self, stage: str):
+        self.data = self.load_from_dir(self.data_config['dir_path'])
+                
+    def load_from_dir(self, root):
+        # split_name = root.split(os.sep)[-1]
+        split_names = ['train', 'dev']
+        final_data = dict()
+        for spl in split_names:
+            txt_dir = os.listdir(join(root, spl, 'txt'))
+            wav_dir = join(root, spl, 'wav')
+            files   = dict()
+            for f in txt_dir:
+                if 'yaml' in f:
+                    files['yaml'] = join(root, spl, 'txt', f)
+                elif 'ar' in f:
+                    files['ar'] = join(root, spl, 'txt', f)
+                elif 'en' in f:
+                    files['en'] = join(root, spl, 'txt', f)
+                else: None
+                
+            data = self.get_yaml_data(files['yaml'])
+            data = pd.DataFrame.from_records(data)
+            
+            data['wav'] = data['wav'].apply(lambda x: os.path.join(wav_dir, x))
+
+            data['en'] = self.get_text_data(files['en'])
+            
+            data['ar'] = self.get_text_data(files['ar'])
+            data = data.sample(frac=1).reset_index(drop=True)
+            data = data.sample(frac=1).reset_index(drop=True)
+            final_data[spl] = DFMap(data, **self.data_config)
+        return final_data
     
-    def __len__(self):
-        return len(self.data)
+    def get_yaml_data(self, path):
+        with open(path) as f:
+            data = yaml.load(f, Loader=CLoader)
+            return data    
     
+    def get_text_data(self, path):
+        with open(path, 'rt', encoding='utf-8', errors='ignors') as f:
+            return f.readlines()
+        
+    def train_dataloader(self):
+        return DataLoader(self.data['train'], batch_size=32, num_workers=2, drop_last=True)
+    
+    def val_dataloader(self):
+        return DataLoader(self.data['dev'], batch_size=32, num_workers=2, drop_last=True)
     
 if __name__ == "__main__":
     pass

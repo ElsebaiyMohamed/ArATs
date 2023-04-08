@@ -135,6 +135,14 @@
         "documentation": {}
     },
     {
+        "label": "DataLoader",
+        "importPath": "torch.utils.data",
+        "description": "torch.utils.data",
+        "isExtraImport": true,
+        "detail": "torch.utils.data",
+        "documentation": {}
+    },
+    {
         "label": "Dataset",
         "importPath": "torch.utils.data",
         "description": "torch.utils.data",
@@ -183,6 +191,15 @@
         "importPath": "os",
         "description": "os",
         "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
         "documentation": {}
     },
     {
@@ -244,7 +261,7 @@
         "documentation": {}
     },
     {
-        "label": "MyDataset",
+        "label": "MuSTCDataset",
         "importPath": "aang.utils.data",
         "description": "aang.utils.data",
         "isExtraImport": true,
@@ -402,11 +419,20 @@
         "documentation": {}
     },
     {
-        "label": "MyDataset",
+        "label": "DFMap",
         "kind": 6,
         "importPath": "aang.utils.data",
         "description": "aang.utils.data",
-        "peekOfCode": "class MyDataset(Dataset):\n    def __init__(self, dir_path, ar_config: dict, en_config: dict, wav_config: dict):\n        self.data       = self.load_from_dir(dir_path)\n        self.ar_config  = ar_config\n        self.en_config  = en_config\n        self.wav_config = wav_config\n        self.ar_config['tokenizer'] = TokenHandler(self.ar_config['tokenizer'], 'ar')\n        self.en_config['tokenizer'] = TokenHandler(self.en_config['tokenizer'], 'en')\n    def load_from_dir(self, root):\n        # split_name = root.split(os.sep)[-1]",
+        "peekOfCode": "class DFMap(Dataset):\n    def __init__(self, df, ar_config: dict, en_config: dict, wav_config, **kwargs):\n        self.df = df\n        self.ar_config  = ar_config.copy()\n        self.en_config  = en_config.copy()\n        self.wav_config = wav_config.copy()\n        self.ar_config['tokenizer'] = TokenHandler(self.ar_config['tokenizer'], 'ar')\n        self.en_config['tokenizer'] = TokenHandler(self.en_config['tokenizer'], 'en')\n    def __len__(self):\n        return len(self.df)",
+        "detail": "aang.utils.data",
+        "documentation": {}
+    },
+    {
+        "label": "MuSTCDataset",
+        "kind": 6,
+        "importPath": "aang.utils.data",
+        "description": "aang.utils.data",
+        "peekOfCode": "class MuSTCDataset(pl.LightningDataModule):\n    def __init__(self, loader_config=None, **data_config):\n        self.data_config = data_config\n        self.loader_config = loader_config\n    def setup(self, stage: str):\n        self.data = self.load_from_dir(self.data_config['dir_path'])\n    def load_from_dir(self, root):\n        # split_name = root.split(os.sep)[-1]\n        split_names = ['train', 'dev']\n        final_data = dict()",
         "detail": "aang.utils.data",
         "documentation": {}
     },
