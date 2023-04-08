@@ -44,10 +44,10 @@ if __name__ == "__main__":
         
         
         train_loader = DataLoader(train, batch_size=int(args.batch_size), shuffle=False, 
-                                  num_workers=mp.cpu_count(), pin_memory=True, drop_last=True)
+                                  num_workers=8, pin_memory=False, drop_last=True)
 
         dev_loader = DataLoader(dev, batch_size=int(args.batch_size), shuffle=False,   
-                                num_workers=mp.cpu_count(), pin_memory=True, drop_last=True)
+                                num_workers=8, pin_memory=False, drop_last=True)
         
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
         
