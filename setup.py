@@ -19,6 +19,6 @@ setuptools.setup(
     
     packages = setuptools.find_packages(where="aang"),
     install_requires=["torch>=1.13", "torchaudio", "torchvision", "torchtext", 
-                      "pytorch-lightning>=1.9", "tokenizers", "pyarabic"],
+                      "pytorch-lightning>=1.9", "tokenizers", "pyarabic", "deepspeed"],
     python_requires = ">=3.7"
 )
