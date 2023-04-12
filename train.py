@@ -61,7 +61,7 @@ if __name__ == "__main__":
         trainer = pl.Trainer(accelerator=args.accelerator, devices=devices, 
                              max_epochs=args.epochs, sync_batchnorm=True, log_every_n_steps=200,
                              callbacks=[progress_bar,], #ckp, pred,],# swa,],  #
-                             #accumulate_grad_batches=2,
+                             accumulate_grad_batches=2,
                              strategy=strategy,
                              enable_model_summary=True, enable_checkpointing=True, benchmark=True, 
                              default_root_dir=os.getcwd())
