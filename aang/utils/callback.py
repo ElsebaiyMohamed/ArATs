@@ -33,7 +33,7 @@ class Predictions(Callback):
                             logger=True, sync_dist=False, rank_zero_only=True)
                 pred += f"'{h} guess:' \n\t {t[r]}\n\n"
 
-            rprint(f'Ground Truth {batch_idx}: \n\t {j[r]} \n\n {pred}')
+            rprint(f'\nGround Truth {batch_idx}: \n\t {j[r]} \n\n {pred}')
                 
     def load_state_dict(self, state_dict):
         self.tokenizers.update(state_dict)
