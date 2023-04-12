@@ -26,8 +26,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    strategy = DDPStrategy(process_group_backend="nccl", start_method='fork', find_unused_parameters=False) if str(args.strategy) == 'ddp' else str(args.strategy)
-    # strategy = str(args.strategy)
+    # strategy = DDPStrategy(process_group_backend="nccl", start_method='fork', find_unused_parameters=False) if str(args.strategy) == 'ddp' else str(args.strategy)
+    strategy = str(args.strategy)
         
     if args.data_dir is not None:
         ar_config  = {'tokenizer': args.ar_json,

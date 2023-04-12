@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name = "aang",
-    version = "0.2.81",
+    version = "0.2.82",
     author = "seba3y",
     author_email = "sebaeymohamed43@gmail.com",
     description = "speech translation",
