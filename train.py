@@ -34,8 +34,8 @@ if __name__ == "__main__":
                       'size': 110}
         wav_config = {'sr': 16000,
                       'wave_size': 30,
-                      'frame_size': 30000,
-                      'frame_stride': 20000,
+                      'frame_size': 20000,
+                      'frame_stride': 16000,
                       'b4': 20}
         
         datamodel = MuSTCDataset(data_config=dict(dir_path=args.data_dir, ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config))
