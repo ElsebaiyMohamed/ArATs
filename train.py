@@ -60,7 +60,7 @@ if __name__ == "__main__":
         devices = args.devices if args.devices == 'auto' else int(args.devices)
         trainer = pl.Trainer(accelerator=args.accelerator, devices=devices, 
                              max_epochs=args.epochs, sync_batchnorm=True, log_every_n_steps=200,
-                             callbacks=[progress_bar, pred], #ckp, ,],# swa,],  #
+                             callbacks=[ pred], #progress_bar,ckp, ,],# swa,],  #
                              accumulate_grad_batches=2,
                              strategy=strategy,
                              enable_model_summary=True, enable_checkpointing=True, benchmark=True, 
