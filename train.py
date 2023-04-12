@@ -16,6 +16,8 @@ if __name__ == "__main__":
     parser.add_argument("--ar_json", default=None)
     
     parser.add_argument("--batch_size", default=8)
+    parser.add_argument("--worker", default=2)
+    
     parser.add_argument("--accelerator", default="auto")
     parser.add_argument("--devices", default="auto")
     parser.add_argument("--strategy", default='auto')
@@ -38,7 +40,7 @@ if __name__ == "__main__":
                       'frame_stride': 16000,
                       'b4': 20}
         
-        datamodel = MuSTCDataset(loader_config= {'batch_size': int(args.batch_size)}, data_config=dict(dir_path=args.data_dir, ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config))
+        datamodel = MuSTCDataset(loader_config= {'batch_size': int(args.batch_size), 'worker': int(args.worker)}, data_config=dict(dir_path=args.data_dir, ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config))
 
         
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
