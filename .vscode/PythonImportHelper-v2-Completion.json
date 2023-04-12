@@ -387,7 +387,7 @@
         "kind": 6,
         "importPath": "aang.utils.callback",
         "description": "aang.utils.callback",
-        "peekOfCode": "class Predictions(Callback):\n    def __init__(self, config):\n        self.tokenizers = dict()\n        for k, v in config.items():\n            self.tokenizers[k] = TokenHandler(v, k)\n    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, *args, **kwargs):\n#         if not batch_idx % 1000:\n        wave, en, ar = batch\n        ground_truth = {'en': en[:, 1:], 'ar': ar[:, 1:]}\n        with torch.no_grad():",
+        "peekOfCode": "class Predictions(Callback):\n    def __init__(self, config):\n        self.tokenizers = dict()\n        for k, v in config.items():\n            self.tokenizers[k] = TokenHandler(v, k)\n    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, *args, **kwargs):\n        if not batch_idx % 100:\n            wave, en, ar = batch\n            ground_truth = {'en': en[:, 1:], 'ar': ar[:, 1:]}\n            with torch.no_grad():",
         "detail": "aang.utils.callback",
         "documentation": {}
     },
@@ -396,7 +396,7 @@
         "kind": 5,
         "importPath": "aang.utils.callback",
         "description": "aang.utils.callback",
-        "peekOfCode": "progress_bar = RichProgressBar(theme=RichProgressBarTheme(description=\"green_yellow\",\n                                                          progress_bar=\"green1\",\n                                                          progress_bar_finished=\"green1\",\n                                                          progress_bar_pulse=\"#6206E0\",\n                                                          batch_progress=\"green_yellow\",\n                                                          time=\"grey82\",\n                                                          processing_speed=\"grey82\",\n                                                          metrics=\"green1\",\n                                                        )\n                               )",
+        "peekOfCode": "progress_bar = RichProgressBar(theme=RichProgressBarTheme(description=\"green_yellow\",\n                                                          progress_bar=\"green1\",\n                                                          progress_bar_finished=\"green1\",\n                                                          progress_bar_pulse=\"#6206E0\",\n                                                          batch_progress=\"green_yellow\",\n                                                          time=\"grey82\",\n                                                          processing_speed=\"grey82\",\n                                                          metrics=\"green1\",\n                                                        ),\n                               refresh_rate= 100)",
         "detail": "aang.utils.callback",
         "documentation": {}
     },
