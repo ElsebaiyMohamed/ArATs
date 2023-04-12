@@ -140,10 +140,10 @@ class MuSTCDataset(pl.LightningDataModule):
             return f.readlines()
         
     def train_dataloader(self):
-        return DataLoader(self.data['train'], batch_size=32, num_workers=2, drop_last=True)
+        return DataLoader(self.data['train'], batch_size=self.loader_config['batch_size'], num_workers=2, drop_last=True)
     
     def val_dataloader(self):
-        return DataLoader(self.data['dev'], batch_size=32, num_workers=2, drop_last=True)
+        return DataLoader(self.data['dev'], batch_size=self.loader_config['batch_size'], num_workers=2, drop_last=True)
     
 if __name__ == "__main__":
     pass

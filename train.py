@@ -38,7 +38,7 @@ if __name__ == "__main__":
                       'frame_stride': 16000,
                       'b4': 20}
         
-        datamodel = MuSTCDataset(data_config=dict(dir_path=args.data_dir, ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config))
+        datamodel = MuSTCDataset(loader_config= {'batch_size': args.batch_size}, data_config=dict(dir_path=args.data_dir, ar_config=ar_config.copy(), en_config=en_config.copy(), wav_config=wav_config))
 
         
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
