@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -28,10 +27,10 @@ class EncoderLayer(nn.Module):
 
 
         self.ffn       = nn.Sequential(nn.LayerNorm(self.config['d_model']),
-                                       nn.Linear(self.config['d_model'], self.config['d_model']*4),
+                                       nn.Linear(self.config['d_model'], self.config['d_model']*2),
                                        nn.ReLU(),
                                        nn.Dropout(self.config['dropout']),
-                                       nn.Linear(self.config['d_model']*4, self.config['d_model']),
+                                       nn.Linear(self.config['d_model']*2, self.config['d_model']),
                                        nn.ReLU(),
                                        nn.Dropout(self.config['dropout']/2))
         
@@ -163,10 +162,10 @@ class DecoderLayer(nn.Module):
                                                bias=True, add_bias_kv=True, batch_first=self.config['batch_first'])
         
         self.ffn       = nn.Sequential(nn.LayerNorm(self.config['d_model']),
-                                       nn.Linear(self.config['d_model'], self.config['d_model']*4),
+                                       nn.Linear(self.config['d_model'], self.config['d_model']*2),
                                        nn.ReLU(),
                                        nn.Dropout(self.config['dropout']),
-                                       nn.Linear(self.config['d_model']*4, self.config['d_model']),
+                                       nn.Linear(self.config['d_model']*2, self.config['d_model']),
                                        nn.ReLU(),
                                        nn.Dropout(0.1))
         

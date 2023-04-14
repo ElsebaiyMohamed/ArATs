@@ -53,8 +53,7 @@ progress_bar = RichProgressBar(theme=RichProgressBarTheme(description="green_yel
                                                           time="grey82",
                                                           processing_speed="grey82",
                                                           metrics="green1",
-                                                        ),
-                               refresh_rate=1)
+                                                        ))
 
 
 ckp = ModelCheckpoint(every_n_train_steps=1000, save_last=True, auto_insert_metric_name=False)
