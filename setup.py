@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name = "aang",
-    version = "0.2.83",
+    version = "0.2.84",
     author = "seba3y",
     author_email = "sebaeymohamed43@gmail.com",
     description = "speech translation",
@@ -19,6 +19,6 @@ setuptools.setup(
     
     packages = setuptools.find_packages(where="aang"),
     install_requires=["torch>=1.13", "torchaudio", "torchvision", "torchtext", 
-                      "pytorch-lightning>=1.9", "tokenizers", "pyarabic", "deepspeed"],
+                      "pytorch-lightning>=1.9", "tokenizers", "pyarabic"],
     python_requires = ">=3.7"
 )
