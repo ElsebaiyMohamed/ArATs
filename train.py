@@ -46,8 +46,8 @@ if __name__ == "__main__":
         pred = Predictions({'ar': ar_config['tokenizer'], 'en': en_config['tokenizer']})
         
         wave_param      = dict(frame_size=20000, frame_stride=16000, b1=5, b2=10, b3=15, b4=20, out_dim=512)
-        encoder_params  = dict(d_model=512, nhead=8, nch=32, dropout=0.3, batch_first=True, size=6)
-        decoder_params  = dict(d_model=512, nhead=16, nch=32, dropout=0.5, batch_first=True, size=6)
+        encoder_params  = dict(d_model=512, nhead=8, nch=20, dropout=0.3, batch_first=True, size=6)
+        decoder_params  = dict(d_model=512, nhead=16, nch=25, dropout=0.5, batch_first=True, size=6)
 
         head_params     = dict(en=dict(d_model=512, voc_size=500), ar=dict(d_model=512, voc_size=500))
         
