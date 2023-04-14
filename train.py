@@ -61,9 +61,9 @@ if __name__ == "__main__":
         model = Speech2TextArcht(**hyper_parameter)
         devices = args.devices if args.devices == 'auto' else int(args.devices)
         trainer = pl.Trainer(accelerator=args.accelerator, devices=devices, 
-                             max_epochs=args.epochs, #sync_batchnorm=True, 
+                             max_epochs=int(args.epochs), #sync_batchnorm=True, 
                              log_every_n_steps=200,
-                             callbacks=[progress_bar, pred], #ckp, ,],# swa,],  #
+                             callbacks=[progress_bar, pred, ckp], #, ,],# swa,],  #
                             #  accumulate_grad_batches=2,
                              strategy=strategy,
                              enable_model_summary=True, enable_checkpointing=True, benchmark=True, 
