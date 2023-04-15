@@ -29,9 +29,8 @@ class Predictions(Callback):
                 t = self.tokenizers[h].decode_batch(results[h]['predection'].detach().argmax(-1).tolist())
                 j = self.tokenizers[h].decode_batch(ground_truth[h].detach().tolist())
                 blue = MF.bleu_score(t, j)
-                pl_module.log(f'{h}_blue', blue, on_step=True, on_epoch=False, prog_bar=True, 
-                            logger=True, sync_dist=False, rank_zero_only=True)
-                pred += f"'{h} guess:' \n\t {t[r]}\n\n"
+                
+                pred += f"'{h} guess: with blue score: {blue}' \n\t {t[r]}\n\n"
 
             rprint(f'\nGround Truth {batch_idx}: \n\t {j[r]} \n\n {pred}')
                 

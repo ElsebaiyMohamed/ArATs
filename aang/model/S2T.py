@@ -162,7 +162,7 @@ class Speech2TextArcht(pl.LightningModule):
             named_loss[f'{h}_Loss'] = h_loss
                 
         
-        self.log_dict(named_loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log_dict(named_loss, on_step=True, on_epoch=True, prog_bar=True)
         
         return loss
     
