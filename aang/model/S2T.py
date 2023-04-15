@@ -154,16 +154,17 @@ class Speech2TextArcht(pl.LightningModule):
         results = self(wave=wave, target={'en': en[:, :-1], 'ar': ar[:, :-1]}, training=True, wave_mask=True, 
                        target_mask=True, dec_mask=True)
         loss = 0
+        named_loss = dict()
         for h, pad_idx in self.hparams.head_names.items():
             h_loss = F.cross_entropy(results[h]['predection'].transpose(2, 1), ground_truth[h], reduction='sum')
             loss += h_loss
             
-            self.log(f'{h}_Loss', h_loss, on_step=True, prog_bar=True, on_epoch=True, logger=True, 
-                     sync_dist=True, rank_zero_only=True)
+            named_loss[f'{h}_Loss'] = h_loss
                 
         
+        named_loss['loss'] = loss
         
-        return loss
+        return named_loss
     
     def validation_step(self, batch, batch_idx):
         at = 'val'
@@ -177,11 +178,9 @@ class Speech2TextArcht(pl.LightningModule):
         for h, pad_idx in self.hparams.head_names.items():
             h_loss = F.cross_entropy(results[h]['predection'].transpose(2, 1), ground_truth[h], reduction='sum')
             loss += h_loss
-            self.log(f'{h}_{at}_Loss', h_loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, 
-                     sync_dist=True, rank_zero_only=True)
+            named_loss[f'{h}_{at}_Loss'] = h_loss
         
-        self.log(f"{at}_Loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, 
-                 sync_dist=True, rank_zero_only=True)
+        self.log_dict(named_loss)
         
         
         
