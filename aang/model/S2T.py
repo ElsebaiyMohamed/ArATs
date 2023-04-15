@@ -162,9 +162,9 @@ class Speech2TextArcht(pl.LightningModule):
             named_loss[f'{h}_Loss'] = h_loss
                 
         
-        named_loss['loss'] = loss
+        self.log_dict(named_loss, on_step=False, on_epoch=True, prog_bar=True)
         
-        return named_loss
+        return loss
     
     def validation_step(self, batch, batch_idx):
         at = 'val'
@@ -180,7 +180,7 @@ class Speech2TextArcht(pl.LightningModule):
             loss += h_loss
             named_loss[f'{h}_{at}_Loss'] = h_loss
         
-        self.log_dict(named_loss)
+        self.log_dict(named_loss, on_step=False, on_epoch=True, prog_bar=True)
         
         
         
@@ -188,7 +188,7 @@ class Speech2TextArcht(pl.LightningModule):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=0.1)
         scheduler = {
             "scheduler": CosineAnnealingWarmRestarts(optimizer, T_0=10000, T_mult=2, eta_min=1e-4),
-            "interval": "epoch",
+            "interval": "step",
             "frequency": 1,}
         return [optimizer], [scheduler]
     
