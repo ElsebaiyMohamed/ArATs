@@ -412,7 +412,7 @@ class Predictions(Callback):
             self.tokenizers[k] = TokenHandler(v, k)
         
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, *args, **kwargs):
-        if not batch_idx % 3000:
+        if not batch_idx % 30000:
         
             ar = batch
             ground_truth = {'ar': ar[:, 1:]}
@@ -457,9 +457,9 @@ random.seed(10)
 for_val = random.choices(os.listdir('/kaggle/input/new-mt-ar-data'), k=5000)
 
 pl.seed_everything(23, workers=True)
-worker = 64
+worker = 8
 accelerator = 'auto'
-devices = 1
+devices = 'auto'
 strategy = 'auto'
 epochs = 500
 
