@@ -531,7 +531,7 @@ if __name__ == '__main__':
                      num_sanity_val_steps=2,
                      log_every_n_steps=400,
                      callbacks=[ ckp, pred],
-                     accumulate_grad_batches=5,
+                     accumulate_grad_batches=15,
                     #  gradient_clip_val=50,
                      sync_batchnorm=True,
                      enable_model_summary=True, enable_checkpointing=True, # benchmark=True, 
