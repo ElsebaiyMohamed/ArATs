@@ -459,7 +459,7 @@ for_val = random.choices(os.listdir('/kaggle/input/new-mt-ar-data'), k=5000)
 pl.seed_everything(23, workers=True)
 worker = 64
 accelerator = 'auto'
-devices = 'auto'
+devices = 1
 strategy = 'auto'
 epochs = 500
 
