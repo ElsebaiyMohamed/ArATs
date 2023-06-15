@@ -462,7 +462,7 @@ pl.seed_everything(23, workers=True)
 worker = 2
 accelerator = 'auto'
 devices = 'auto'
-strategy = 'auto'
+strategy = 'ddp_find_unused_parameters_true'
 epochs = 500
 
 
