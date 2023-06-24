@@ -480,7 +480,7 @@ class DataLightning(pl.LightningDataModule):
 if __name__ == '__main__':
     datamoel = DataLightning()
     model = PreDecoder(512,8, 2048,1000, 4, 12, lr=1e-3)
-    trainer = pl.Trainer(accelerator=accelerator, devices=1, 
+    trainer = pl.Trainer(accelerator=accelerator, devices=devices, 
                      max_epochs=epochs,
                      strategy=strategy,
                      num_sanity_val_steps=2,
