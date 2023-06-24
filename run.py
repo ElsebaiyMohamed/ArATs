@@ -10,7 +10,7 @@ from tqdm import tqdm
 import re
 from tokenizers import Tokenizer
 from pyarabic.trans import normalize_digits
-
+import copy
 
 
 
