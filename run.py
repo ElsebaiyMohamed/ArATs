@@ -118,110 +118,104 @@ class TokenHandler:
         return self.tok.decode_batch(ids)
 
 
-class DecoderLayer(nn.Module):
-    def __init__(self, **kwargs):
-        """@params:
-                    d_model, nhead, batch_first=True
-        """
-        super(DecoderLayer, self).__init__()
-        self.config = kwargs
-        
-        self.pre_norm1 = nn.LayerNorm(self.config['d_model'])
-        
-        self.smha      = nn.MultiheadAttention(embed_dim=self.config['d_model'], num_heads=self.config['nhead'], dropout=0.05, 
-                                               bias=True, add_bias_kv=True, batch_first=self.config['batch_first'])
-        
-        
-        self.ffn       = nn.Sequential(nn.LayerNorm(self.config['d_model']),
-                                       nn.Linear(self.config['d_model'], 2048, bias=False),
-                                       nn.GELU(),
-                                       nn.Linear(2048, self.config['d_model'], bias=False))
-         
-        
-    def forward(self, query, query_mask=None, att_mask=None, need_weights=False, training=False):
-        if query.dim() < 3:
-            query = query.view(1, -1, self.config['d_model']).contiguous()
-        
-        query = self.pre_norm1(query)
-        
+class TransformerDecoderLayer(nn.Module):
+    __constants__ = ['batch_first', 'norm_first']
 
-        
-        att_out, _ = self.smha(query, query, query, key_padding_mask=query_mask, need_weights=need_weights, attn_mask=att_mask)
-        att_out = att_out + (query / self.config['n'])
-        
-
-        query = (query / self.config['n']) + self.ffn(query)
-        
-        if need_weights:
-            return query, att_weight
-        
-        return query
-    
-    def init_weights(self):
-        
-        for p in self.parameters():
-            if p.dim() != 1:
-                nn.init.xavier_normal_(p.data)
-            else:
-                nn.init.zeros_(p.data)
-                
-        for m in self.modules():
-            if isinstance(m, (nn.LayerNorm, )):
-                m.reset_parameters()
-
-
-
-class Decoder(nn.Module):
-    def __init__(self, **kwargs):
-        '''d_model=512, nhead=4, batch_first=True, size'''
+    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
+                 activation= F.relu,
+                 layer_norm_eps: float = 1e-5, batch_first: bool = False, norm_first: bool = False,
+                 device=None, dtype=None):
+        factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
-        self.config = kwargs
-        assert self.config['d_model'] % self.config['nhead'] == 0, 'd_model should be dvisible by num of heads'
-        
-        self.dec_stack = nn.ModuleList([DecoderLayer(d_model=self.config['d_model'], nhead=self.config['nhead'], 
-                                        batch_first=self.config['batch_first'], n=torch.sqrt(torch.tensor((i+1)*1.0))) 
-                                        for i in range(self.config['size'])])
-        self.norm_last = nn.LayerNorm(self.config['d_model'])
-        
-        
-    def forward(self, query, query_mask=None, att_mask=None, need_weights=False, training=False):
-        if need_weights:
-            for layer in self.dec_stack:
-                query, atten_weight = layer(query, query_mask=query_mask, att_mask=att_mask, 
-                                            need_weights=need_weights, training=training)
-                query = self.norm_last(query)
-            return query, atten_weight
-        
-        for layer in self.dec_stack:
-            query = layer(query, query_mask=query_mask, att_mask=att_mask,
-                          need_weights=need_weights, training=training)
-            query = self.norm_last(query)
-            
-        return query
-    
-    def init_weights(self):
-        
-        for p in self.parameters():
-            if p.dim() != 1:
-                nn.init.xavier_normal_(p.data)
-            else:
-                nn.init.zeros_(p.data)
-                
-        for m in self.modules():
-            if isinstance(m, (nn.LayerNorm,)):
-                m.reset_parameters()
-                
+        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout, batch_first=batch_first,
+                                            **factory_kwargs)
 
+        # Implementation of Feedforward model
+        self.linear1 = nn.Linear(d_model, dim_feedforward, **factory_kwargs)
+        self.dropout = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(dim_feedforward, d_model, **factory_kwargs)
+
+        self.norm_first = norm_first
+        self.norm1 = nn.LayerNorm(d_model, eps=layer_norm_eps, **factory_kwargs)
+
+        self.norm3 = nn.LayerNorm(d_model, eps=layer_norm_eps, **factory_kwargs)
+        self.dropout1 = nn.Dropout(dropout)
+
+        self.dropout3 = nn.Dropout(dropout)
+
+        # Legacy string support for activation function.
+        if isinstance(activation, str):
+            self.activation = _get_activation_fn(activation)
+        else:
+            self.activation = activation
+
+    def __setstate__(self, state):
+        if 'activation' not in state:
+            state['activation'] = F.relu
+        super().__setstate__(state)
+        
+    def forward(
+        self,
+        tgt,
+        tgt_mask= None,
+        tgt_key_padding_mask= None,
+        tgt_is_causal: bool = False,
+        ):
+        
+
+        x = tgt
+        if self.norm_first:
+            x = x + self._sa_block(self.norm1(x), tgt_mask, tgt_key_padding_mask, tgt_is_causal)
+
+            x = x + self._ff_block(self.norm3(x))
+        else:
+            x = self.norm1(x + self._sa_block(x, tgt_mask, tgt_key_padding_mask, tgt_is_causal))
+
+            x = self.norm3(x + self._ff_block(x))
+
+        return x
+
+
+    # self-attention block
+    def _sa_block(self, x,
+                  attn_mask, key_padding_mask, is_causal: bool = False):
+        x = self.self_attn(x, x, x,
+                           attn_mask=attn_mask,
+                           key_padding_mask=key_padding_mask,
+                           is_causal=is_causal,
+                           need_weights=False)[0]
+        return self.dropout1(x)
+
+
+    # feed forward block
+    def _ff_block(self, x):
+        x = self.linear2(self.dropout(self.activation(self.linear1(x))))
+        return self.dropout3(x)
+
+
+
+def _get_clones(module, N):
+    # FIXME: copy.deepcopy() is not defined on nn.module
+    return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
+
+
+def _get_activation_fn(activation: str):
+    if activation == "relu":
+        return F.relu
+    elif activation == "gelu":
+        return F.gelu
+
+    raise RuntimeError("activation should be relu/gelu, not {}".format(activation))
 
 class Head(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self, d_model, voc_size):
         '''d_model, voc_size'''
         super().__init__()
-        self.config = kwargs
+
         
-        self.layer1 =  nn.Sequential(nn.Linear(self.config['d_model'],25000),
+        self.layer1 =  nn.Sequential(nn.Linear(d_model, voc_size//3),
                                      nn.GELU(),
-                                     nn.Linear(25000, self.config['voc_size']))
+                                     nn.Linear(voc_size//3, voc_size))
 
        
     def forward(self, x, **kwargs):
@@ -236,24 +230,35 @@ class Head(nn.Module):
                 nn.init.xavier_normal_(p.data)
             else:
                 nn.init.zeros_(p.data)
+class TransformerDecoder(nn.Module):
+    __constants__ = ['norm']
 
-
-
-class DecoderPretrain(pl.LightningModule):
-    def __init__(self, lr):
+    def __init__(self, decoder_layer, num_layers, norm=None):
         super().__init__()
-        self.head_params = dict( ar=dict(d_model=280, voc_size=1000))
-        self.decoder_params  = dict(d_model=280, nhead=4, batch_first=True, size=30)
-        self.head_names      = dict(ar=4) #en=4,
-        self.lr              = lr
+        torch._C._log_api_usage_once(f"torch.nn.modules.{self.__class__.__name__}")
+        self.layers = _get_clones(decoder_layer, num_layers)
+        self.num_layers = num_layers
+        self.norm = norm
         
-        self.heads = nn.ModuleDict()
-        for h, pad_idx in self.head_names.items():
-            self.heads[h] = nn.ModuleDict({'emp_layer': nn.Embedding(num_embeddings=self.head_params[h]['voc_size'], 
-                                                            embedding_dim=self.head_params[h]['d_model'], padding_idx=pad_idx),
-                                            'context': Decoder(**self.decoder_params),
-                                            'output_layer': Head(**self.head_params[h])})
-        self.init_weights()
+    def forward(self, tgt, tgt_mask= None, tgt_key_padding_mask = None, is_causal=True):
+        output = tgt
+
+        for mod in self.layers:
+            output = mod(output, tgt_mask=tgt_mask, tgt_key_padding_mask=tgt_key_padding_mask, tgt_is_causal=is_causal)
+
+        if self.norm is not None:
+            output = self.norm(output)
+
+        return output
+class PreDecoder(pl.LightningModule):
+    def __init__(self, d_model, nhead, dim, voc_size, pad_idx, n_layers, lr):
+        super().__init__()
+        self.save_hyperparameters()
+        
+        self.emb = nn.Embedding(self.hparams.voc_size, self.hparams.d_model, self.hparams.pad_idx)
+        decoder_layer = TransformerDecoderLayer(d_model=self.hparams.d_model, nhead=self.hparams.nhead, dim_feedforward=self.hparams.dim, activation='gelu', norm_first=True, batch_first=True)
+        self.dec = TransformerDecoder(decoder_layer, self.hparams.n_layers)
+        self.out = Head(self.hparams.d_model, self.hparams.voc_size)
         
     @torch.no_grad()
     def pe(self, length: int, depth: int, device, n=10000):
@@ -280,91 +285,58 @@ class DecoderPretrain(pl.LightningModule):
     
     def look_ahead_mask(self, tgt_len:int, src_len: int, device):
         mask = torch.triu(torch.ones((tgt_len, src_len), device=device), diagonal=1).type(torch.bool)
-        
-        return mask
-    
-    def forward(self, target, target_mask=False, dec_mask=False, need_dec_weights=False, training=False):
 
-        model_output = dict() 
-        for h, _ in self.head_names.items():
-            model_output[h] = dict()
+    def forward(self, tgt, tgt_mask= None, tgt_key_padding_mask=None, is_causal=True):
+        if tgt_key_padding_mask is not None:
+            tgt_key_padding_mask = (tgt == self.hparams.pad_idx).to(tgt.device)
+
             
-        for h, _ in self.head_names.items():
+        if tgt_mask is not None:
+            tgt_mask = self.look_ahead_mask(tgt.size(1), tgt.size(1), device=tgt.device)
             
-            target_head = target[h]
-            assert target_head.dim() < 3, f'Head: {h}, target size should be 1D tensor for unbatched and 2D for batched'
-            if target_head.dim() < 2:
-                target_head = target_head.view(1, -1)
-                
-            query_mask = None
-            if target_mask:
-                query_mask = (target_head == self.head_names.get(h)).to(target_head.device)
-            
-            if dec_mask:
-                att_mask = self.look_ahead_mask(target_head.size(1), target_head.size(1), device=target_head.device)
-                
-            else: 
-                att_mask = None
-            
-            target_head = self.heads[h]['emp_layer'](target_head)
-            B, T, D = target_head.size()
-            target_head = self.pe(T, D, target_head.device) + target_head
-            
-            target_head = self.heads[h]['context'](query=target_head, query_mask=query_mask, att_mask=att_mask,
-                                              need_weights=need_dec_weights, training=training)
-            
-            if need_dec_weights:
-                target_head, model_output[h]['attention_weights'] = target_head[0], target_head[1].detach()
-            
-            model_output[h]['predection'] = self.heads[h]['output_layer'](target_head); del target_head
-           
-        return model_output
-    
+        tgt = self.emb(tgt)
+        if tgt.dim() == 2:
+            B, (T, D) = 1, tgt.size()
+        else:
+            B, T, D = tgt.size()
+        tgt = self.pe(T, D, tgt.device) + tgt
+        
+        tgt = self.dec(tgt, tgt_mask=tgt_mask, tgt_key_padding_mask=tgt_key_padding_mask, is_causal=is_causal)
+        
+        tgt = self.out(tgt)
+        
+        return tgt
     
     def training_step(self, batch, batch_idx):
-        
-   
-        ar = batch
-        ground_truth = {'ar': ar[:, 1:]}
-        results = self(target={'ar': ar[:, :-1]}, training=True,
-                       target_mask=True, dec_mask=True)
-        loss = 0.0
+        ground_truth = batch[:, :-1]
+        batch = batch[:, 1:]
+        results = self(batch, tgt_mask=None, tgt_key_padding_mask=None, is_causal=True)
+
         named_loss = dict()
+
+        preds = results.transpose(2, 1)
+        loss = F.cross_entropy(preds, ground_truth, reduction='mean', ignore_index=self.hparams.pad_idx)
         named_loss[f'Loss'] = loss
-        
-        for h, pad_idx in self.head_names.items():
-            preds = results[h]['predection'].transpose(2, 1)
-            h_loss = F.cross_entropy(preds, ground_truth[h], reduction='mean', ignore_index=pad_idx)
-            loss += h_loss
-            
-            
-            named_loss[f'{h}_Acc'] = self.Acc(preds, ground_truth[h], pad_idx)
+
+        named_loss[f'Acc'] = self.Acc(preds, ground_truth, self.hparams.pad_idx)
                                 
-        named_loss[f'Loss'] = loss
-                
-        
         self.log_dict(named_loss, on_step=True, on_epoch=False, prog_bar=True, sync_dist=True,)
         
         return loss
-    
-    def validation_step(self, batch, batch_idx):
-        
-        ar = batch
-        ground_truth = { 'ar': ar[:, 1:]}
-        results = self(target={'ar': ar[:, :-1]}, training=True,
-                       target_mask=True, dec_mask=True)
-        loss = 0.0
-        named_loss = dict()
-        
-        for h, pad_idx in self.head_names.items():
-            preds = results[h]['predection'].transpose(2, 1)
-            h_loss = F.cross_entropy(preds, ground_truth[h], reduction='mean', ignore_index=pad_idx)
-            loss += h_loss
             
-#             named_loss[f'{h}_{at}_Loss'] = h_loss
-            named_loss[f'{h}_val_Acc'] = self.Acc(preds, ground_truth[h], pad_idx)
-                                                                                 
-        named_loss['val_Loss'] = loss
+    def validation_step(self, batch, batch_idx):
+        ground_truth = batch[:, :-1]
+        batch = batch[:, 1:]
+        results = self(batch, tgt_mask=None, tgt_key_padding_mask=True, is_causal=True)
+
+        named_loss = dict()
+
+        preds = results.transpose(2, 1)
+        loss = F.cross_entropy(preds, ground_truth, reduction='mean', ignore_index=self.hparams.pad_idx)
+        named_loss[f'Val Loss'] = loss
+
+        named_loss[f'Val Acc'] = self.Acc(preds, ground_truth, self.hparams.pad_idx)
+                                
         self.log_dict(named_loss, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True,)
     
     @torch.no_grad()
@@ -382,58 +354,42 @@ class DecoderPretrain(pl.LightningModule):
         mask = mask.float()
         return match.sum() / mask.sum()
     
-    def init_weights(self):
-        
-        for p in self.parameters():    
-            if p.dim() != 1:
-                nn.init.xavier_normal_(p.data)
-            else:
-                nn.init.zeros_(p.data)
-                
-        for m in self.modules():
-            if isinstance(m, (nn.LayerNorm,)):
-                m.reset_parameters()
-#     def on_train_start(self):
-#         self.optimizers().param_groups = self.optimizers()._optimizer.param_groups
-        
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), lr=self.lr, momentum=0.3)
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.lr, momentum=0.3)
         scheduler = {
             "scheduler": CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=1e-5, verbose=True),
             "interval": "epoch",
             "frequency": 1,}
         return [optimizer], [scheduler]
 
-
+    
 
 class Predictions(Callback):
-    def __init__(self, config):
+    def __init__(self, js, la):
         super().__init__()
-        self.tokenizers = dict()
-        for k, v in config.items():
-            self.tokenizers[k] = TokenHandler(v, k)
+        self.tokenizers = TokenHandler(js, la)
         
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, *args, **kwargs):
         if not batch_idx % 30000:
         
-            ar = batch
-            ground_truth = {'ar': ar[:, 1:]}
-            
+            ground_truth = batch[:, :-1]
+            batch = batch[:, 1:]
 
+            
             with torch.no_grad():
-                results = pl_module(target={'ar': ar[:, :-1]}, training=True,
-                       target_mask=True, dec_mask=True)
+                results = pl_module(batch, tgt_mask=None, tgt_key_padding_mask=None, is_causal=True)
+                
             pred = ''
             ground = ''
-            r = torch.randint(0, ar.size(0), (1, )).item()
-            for h, pad_idx in pl_module.head_names.items():
+            r = torch.randint(0, batch.size(0), (1, )).item()
 
-                t = self.tokenizers[h].decode_batch(results[h]['predection'].detach().argmax(-1).tolist())
-                j = self.tokenizers[h].decode_batch(ground_truth[h].detach().tolist())
-                blue = MF.bleu_score(t, j)
-                
-                pred += f"'{h} guess: with blue score: {blue:0.4f} ' \n\t {t[r]}\n\n"
-                ground += f"'{h}' \n\t {j[r]}\n\t"
+
+            t = self.tokenizers.decode_batch(results.detach().argmax(-1).tolist())
+            j = self.tokenizers.decode_batch(ground_truth.detach().tolist())
+            blue = MF.bleu_score(t, j)
+
+            pred += f"'guess: with blue score: {blue:0.4f} ' \n\t {t[r]}\n\n"
+            ground += f"\n\t {j[r]}\n\t"
 
             rprint(f'\nGround Truth {batch_idx}: \n\t {ground} \n\n {pred}')
                 
@@ -445,13 +401,12 @@ class Predictions(Callback):
     
 en_json = '/kaggle/input/helper-for-s2t/en_tokenizer.json'
 ar_json = '/kaggle/input/helper-for-s2t/ar_tokenizer.json'
-pred = Predictions({'ar': ar_json}) 
+pred = Predictions(ar_json, 'ar') 
 
 
-ckp = ModelCheckpoint(every_n_train_steps=2000, save_last=True, auto_insert_metric_name=False,
+ckp = ModelCheckpoint(every_n_train_steps=500, save_last=True, auto_insert_metric_name=False,
                       dirpath='/kaggle/working/lightning_logs/checkpoints')
 # swa = StochasticWeightAveraging(swa_lrs=1e-4, annealing_epochs=5, swa_epoch_start=10,)
-
 
 import random
 train_path = ['/kaggle/input/mt-en-ar-data', '/kaggle/input/new-mt-ar-data']
@@ -524,15 +479,15 @@ class DataLightning(pl.LightningDataModule):
 
 if __name__ == '__main__':
     datamoel = DataLightning()
-    model = DecoderPretrain(5e-3)
-    trainer = pl.Trainer(accelerator=accelerator, devices=devices, 
+    model = PreDecoder(512,8, 2048,1000, 4, 12, lr=1e-3)
+    trainer = pl.Trainer(accelerator=accelerator, devices=1, 
                      max_epochs=epochs,
                      strategy=strategy,
                      num_sanity_val_steps=2,
                      log_every_n_steps=400,
                      callbacks=[ ckp, pred],
-                     accumulate_grad_batches=15,
-                    #  gradient_clip_val=50,
+                     accumulate_grad_batches=25,
+                     gradient_clip_val=0.5,
                      sync_batchnorm=True,
                      enable_model_summary=True, enable_checkpointing=True, # benchmark=True, 
                      default_root_dir='/kaggle/working/')
