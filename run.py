@@ -327,7 +327,7 @@ class PreDecoder(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         ground_truth = batch[:, :-1]
         batch = batch[:, 1:]
-        results = self(batch, tgt_mask=None, tgt_key_padding_mask=True, is_causal=True)
+        results = self(batch, tgt_mask=None, tgt_key_padding_mask=None, is_causal=True)
 
         named_loss = dict()
 
