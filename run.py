@@ -418,7 +418,7 @@ for_val = random.choices(os.listdir('/kaggle/input/new-mt-ar-data'), k=5000)
 pl.seed_everything(23, workers=True)
 worker = 2
 accelerator = 'auto'
-devices = 'auto'
+devices = 2
 strategy = 'auto'
 epochs = 500
 
@@ -486,7 +486,7 @@ if __name__ == '__main__':
                      max_epochs=epochs,
                      strategy=strategy,
                      num_sanity_val_steps=2,
-                     log_every_n_steps=400,
+                     log_every_n_steps=600,
                      callbacks=[ ckp, pred],
                      accumulate_grad_batches=12,
                      gradient_clip_val=0.5,
