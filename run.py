@@ -116,6 +116,8 @@ class TokenHandler:
     
     def decode_batch(self, ids: list):
         return self.tok.decode_batch(ids)
+    def copy(self):
+        return copy.deepcopy(self)
 
 
 class TransformerDecoderLayer(nn.Module):
