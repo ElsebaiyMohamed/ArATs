@@ -414,7 +414,7 @@ random.seed(10)
 for_val = random.choices(os.listdir('/kaggle/input/new-mt-ar-data'), k=5000)
 
 pl.seed_everything(23, workers=True)
-worker = 2
+worker = 32
 accelerator = 'auto'
 devices = 'auto'
 strategy = 'auto'
@@ -473,7 +473,7 @@ class DataLightning(pl.LightningDataModule):
 #             idx.extend([i]*self.s)
         
 #         sam = SubsetRandomSampler(idx,)  # sampler=sam, 
-        val_loader = DataLoader(val_loader, batch_size=None, shuffle=False, prefetch_factor=None, pin_memory=True, num_workers=2, persistent_workers=False)
+        val_loader = DataLoader(val_loader, batch_size=None, shuffle=False, prefetch_factor=None, pin_memory=True, num_workers=16, persistent_workers=False)
         return val_loader 
 
 
