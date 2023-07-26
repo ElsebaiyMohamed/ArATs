@@ -1,6 +1,10 @@
 import librosa
 from transformers import AutoConfig, AutoModelForSpeechSeq2Seq, Wav2Vec2Processor
 
+model_id = 'sakallana'
+processor = Wav2Vec2Processor.from_pretrained(model_id)
+
+model = AutoModelForSpeechSeq2Seq.from_pretrained(model_id)
 
 def prepare_dataset(batch):
     sr = 16000
@@ -113,10 +117,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--tpu_cores', type=int, default=0)
     
-    model_id = 'sakallana'
-    processor = Wav2Vec2Processor.from_pretrained(model_id)
     
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(model_id)
 
     data = load_dataset('data', streaming=False)
     
