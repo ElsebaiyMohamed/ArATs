@@ -81,16 +81,18 @@ def main():
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--tpu_cores', type=int, default=0)
+
+    args = parser.parse_args()
     data = load_dataset('data', streaming=False)
     
-    data['train'] = data['train'].filter(lambda example, indice: indice % parser.ratio == 0, with_indices=True)
+    data['train'] = data['train'].filter(lambda example, indice: indice % args.ratio == 0, with_indices=True)
     data['validation'] = data['validation'].filter(lambda example, indice: indice % 12 == 0, with_indices=True)
     maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=20, batched=True, batch_size=20, remove_columns=['id', 'sentence'], keep_in_memory=True)
     
     colleter = DataCollatorWav2txtWithPadding(processor, padding='longest')
     wer = load("wer")
 
-    model_id, batch_size, gas, lr, epochs, tpu_cores = model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores
+    model_id, batch_size, gas, lr, epochs, tpu_cores = model_id, args.batch_size, args.gas, args.lr, args.epochs, args.tpu_cores
 
     
     def wer_metric(eval_pred):
