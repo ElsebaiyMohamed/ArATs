@@ -1,11 +1,6 @@
 import librosa
 from transformers import AutoConfig, AutoModelForSpeechSeq2Seq, Wav2Vec2Processor
 
-model_id = 'sakallana'
-processor = Wav2Vec2Processor.from_pretrained(model_id)
-
-model = AutoModelForSpeechSeq2Seq.from_pretrained(model_id)
-
 
 def prepare_dataset(batch):
     sr = 16000
@@ -57,16 +52,6 @@ class DataCollatorWav2txtWithPadding:
         return batch
         
 
-from datasets import load_dataset
-
-data = load_dataset('data', streaming=False)
-
-
-data['train'] = data['train'].filter(lambda example, indice: indice % 12 == 0, with_indices=True)
-data['validation'] = data['validation'].filter(lambda example, indice: indice % 10 == 0, with_indices=True)
-
-maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=25, batched=True, batch_size=50, remove_columns=['id', 'sentence'], keep_in_memory=True)
-        
 
 
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
@@ -75,7 +60,8 @@ from evaluate import load
 colleter = DataCollatorWav2txtWithPadding(processor, padding='longest')
 wer = load("wer")
 
-def train():
+def train(model_id, batch_size, gas, lr, epochs, tpu_cores):
+   
     def wer_metric(eval_pred):
         predictions, labels = eval_pred
         predictions = predictions.argmax(2)
@@ -87,13 +73,13 @@ def train():
                                     output_dir=model_id,
                                     do_train=True,
                                     do_eval=True,
-                                    per_device_train_batch_size=32,
-                                    per_device_eval_batch_size=32,
-                                    gradient_accumulation_steps=1,
-                                    learning_rate=3e-3,
+                                    per_device_train_batch_size=batch_size,
+                                    per_device_eval_batch_size=batch_size,
+                                    gradient_accumulation_steps=gas,
+                                    learning_rate=lr,
                                     weight_decay=0.1,
                                     max_grad_norm=0.3,
-                                    num_train_epochs=1,
+                                    num_train_epochs=epochs,
                                     warmup_ratio=0.2,
                                     dataloader_drop_last=True,
                                     sortish_sampler=True,
@@ -102,7 +88,7 @@ def train():
                                     save_steps=500,
                                     eval_delay=500,
                                     label_smoothing_factor=0.1,
-                                    evaluation_strategy='steps', tpu_num_cores=8,
+                                    evaluation_strategy='steps', tpu_num_cores=tpu_cores,
                                     predict_with_generate=True,
                                     run_name='test_tpu')
     
@@ -116,4 +102,27 @@ def train():
     doing.train()
     
 if __name__ == '__main__':
-    train()
+    import argparse
+    from datasets import load_dataset
+    
+    parser = argparse.ArgumentParser(prog='TPU runing script')
+    parser.add_argument('--ratio', type=int, default=20)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--gas', type=int, default=1)
+    parser.add_argument('--lr', type=float, default=1e-4)
+    parser.add_argument('--epochs', type=int, default=1)
+    parser.add_argument('--tpu_cores', type=int, default=0)
+    
+    model_id = 'sakallana'
+    processor = Wav2Vec2Processor.from_pretrained(model_id)
+    
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(model_id)
+
+    data = load_dataset('data', streaming=False)
+    
+    data['train'] = data['train'].filter(lambda example, indice: indice % parser.ratio == 0, with_indices=True)
+    data['validation'] = data['validation'].filter(lambda example, indice: indice % 12 == 0, with_indices=True)
+    
+    maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=20, batched=True, batch_size=10, remove_columns=['id', 'sentence'], keep_in_memory=True)
+             
+    train(model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores)
