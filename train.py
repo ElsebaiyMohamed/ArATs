@@ -1,5 +1,8 @@
 import librosa
 from transformers import AutoConfig, AutoModelForSpeechSeq2Seq, Wav2Vec2Processor
+    
+import argparse
+from datasets import load_dataset
 
 model_id = 'sakallana'
 batch_size = 32
@@ -118,22 +121,19 @@ def main():
                           )
     
     doing.train()
-    
-if __name__ == '__main__':
-    import argparse
-    from datasets import load_dataset
-    
-    parser = argparse.ArgumentParser(prog='TPU runing script')
-    parser.add_argument('--ratio', type=int, default=20)
-    parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--gas', type=int, default=1)
-    parser.add_argument('--lr', type=float, default=1e-4)
-    parser.add_argument('--epochs', type=int, default=1)
-    parser.add_argument('--tpu_cores', type=int, default=0)
-    
-    
 
-    
-    
-    model_id, batch_size, gas, lr, epochs, tpu_cores = model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores
-    main()
+
+parser = argparse.ArgumentParser(prog='TPU runing script')
+parser.add_argument('--ratio', type=int, default=20)
+parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--gas', type=int, default=1)
+parser.add_argument('--lr', type=float, default=1e-4)
+parser.add_argument('--epochs', type=int, default=1)
+parser.add_argument('--tpu_cores', type=int, default=0)
+
+
+
+
+
+model_id, batch_size, gas, lr, epochs, tpu_cores = model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores
+main()
