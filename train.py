@@ -91,8 +91,8 @@ def main():
     
     colleter = DataCollatorWav2txtWithPadding(processor, padding='longest')
     wer = load("wer")
-
-    model_id, batch_size, gas, lr, epochs, tpu_cores = model_id, args.batch_size, args.gas, args.lr, args.epochs, args.tpu_cores
+    model_id = 'sakallana'
+    batch_size, gas, lr, epochs, tpu_cores = args.batch_size, args.gas, args.lr, args.epochs, args.tpu_cores
 
     
     def wer_metric(eval_pred):
