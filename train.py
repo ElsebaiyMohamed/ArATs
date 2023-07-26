@@ -7,7 +7,7 @@ gas = 1
 lr = 1e-4
 epochs = 1
 tpu_cores = 8
-
+data = None
 
 processor = Wav2Vec2Processor.from_pretrained(model_id)
 
@@ -73,6 +73,7 @@ wer = load("wer")
 
 def main():
    
+    maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=20, batched=True, batch_size=10, remove_columns=['id', 'sentence'], keep_in_memory=True)
     def wer_metric(eval_pred):
         predictions, labels = eval_pred
         predictions = predictions.argmax(2)
@@ -131,6 +132,5 @@ if __name__ == '__main__':
     data['train'] = data['train'].filter(lambda example, indice: indice % parser.ratio == 0, with_indices=True)
     data['validation'] = data['validation'].filter(lambda example, indice: indice % 12 == 0, with_indices=True)
     
-    maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=20, batched=True, batch_size=10, remove_columns=['id', 'sentence'], keep_in_memory=True)
     model_id, batch_size, gas, lr, epochs, tpu_cores = model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores
     main()
