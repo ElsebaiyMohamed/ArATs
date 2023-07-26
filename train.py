@@ -64,7 +64,7 @@ from evaluate import load
 colleter = DataCollatorWav2txtWithPadding(processor, padding='longest')
 wer = load("wer")
 
-def train(model_id, batch_size, gas, lr, epochs, tpu_cores):
+def main(model_id, batch_size, gas, lr, epochs, tpu_cores):
    
     def wer_metric(eval_pred):
         predictions, labels = eval_pred
@@ -126,4 +126,4 @@ if __name__ == '__main__':
     
     maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=20, batched=True, batch_size=10, remove_columns=['id', 'sentence'], keep_in_memory=True)
              
-    train(model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores)
+    main(model_id, parser.batch_size, parser.gas, parser.lr, parser.epochs, parser.tpu_cores)
