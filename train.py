@@ -75,7 +75,7 @@ data = load_dataset('data', streaming=False)
     
 data['train'] = data['train'].filter(lambda example, indice: indice % ratio == 0, with_indices=True)
 data['validation'] = data['validation'].filter(lambda example, indice: indice % 12 == 0, with_indices=True)
-maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=20, batched=True, batch_size=10, remove_columns=['id', 'sentence'], keep_in_memory=True)
+maped_data = data.shuffle(seed=40).map(prepare_dataset, num_proc=5, batched=True, batch_size=10, remove_columns=['id', 'sentence'], keep_in_memory=True)
 
 colleter = DataCollatorWav2txtWithPadding(processor, padding='longest')
 wer = load("wer")
