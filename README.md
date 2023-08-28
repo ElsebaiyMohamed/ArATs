@@ -1,35 +1,56 @@
-# (Arabic Text Summarization) AArTS
+# Arabic Text Summarization using Transformers: LANS & WikiLingua Datasets
 
 ## Introduction
 
-Summarization is a crucial task in natural language processing, as it helps to extract the most important information from large amounts of text. With the vast amount of text data available, summarization has become an essential tool for many applications, such as news articles, scientific papers, and product reviews. However, summarization is a challenging task, as it requires understanding the context, identifying the main ideas, and condensing the information into a concise summary.
+Summarization plays a vital role in natural language processing, helping distill essential information from large text volumes. To tackle this challenge, we've developed a transformer-based summarization model. Transformers, designed for tasks with long-range dependencies, excel in abstractive summarization—generating summaries from scratch.
 
-## Existing Work
+Our work leverages the LANS (Large-scale Arabic News Summarization Corpus) dataset and the WikiLingua dataset, comprising ~770k article-summary pairs across 18 languages from WikiHow. With a focus on abstractive techniques, we aim to generate high-quality summaries.
 
-Several approaches have been proposed for summarization, including:
+## LANS Dataset
 
-1) Extractive summarization: This approach involves selecting the most important sentences or phrases from the original text and combining them into a summary.
-2) Abstractive summarization: This approach involves generating a summary from scratch, rather than selecting existing sentences or phrases.
-3) Hybrid summarization: This approach combines both extractive and abstractive methods to generate a summary.
+The LANS dataset offers a rich collection of Arabic news articles and summaries. It encompasses 8,443,484 articles from 22 renowned Arab newspapers spanning two decades (1999-2019). Each article is accompanied by a journalist-written summary, capturing the core content.
 
-There are several neural network architectures that have been proposed for summarization, including:
+**Dataset Statistics:**
 
-* Recurrent Neural Networks (RNNs): RNNs are a type of neural network that are well-suited to sequential data, such as text. They have been used for both extractive and abstractive summarization.
-* Transformers: Transformers are a type of neural network architecture that are particularly well-suited to tasks that require modeling long-range dependencies. They have been used for abstractive summarization.
-* BERT: BERT (Bidirectional Encoder Representations from Transformers) is a pre-trained language model that has been fine-tuned for various NLP tasks, including summarization.
+- Total Articles: 8,443,484
+- Articles Range: 22 newspapers
+- Largest Subset: 1,004,893 articles
+- Smallest Subset: 128,785 articles
+- Categories: Politics, Economy, Sports, Health, Technology
+- Languages: Mainly Modern Standard Arabic (MSA), plus dialects like Moroccan, Egyptian, and Saudi Arabian
 
-## Our Work
+**Evaluation:**
+Automatic evaluation using ROUGE, METEOR, and BLEU metrics yielded promising results:
 
-Our work focuses on developing a summarization model using transformers. We aim to develop a model that can generate high-quality summaries for a given text. Our model will be trained on a large dataset LANS dataset of text and summaries, and will use an abstractive techniques to generate summaries.
+- ROUGE-1: 0.5310
+- METEOR: 0.5460
+- BLEU: 0.4740
 
-We will evaluate our model using the ROUGE metric, which is a widely-used metric for evaluating the quality of summaries. ROUGE measures the overlap between the generated summary and the reference summary, and provides a score based on the amount of overlap.
+Human evaluation of 1000 summaries confirmed high quality, averaging a score of 4.5.
 
-We will also compare our model with existing summarization models, such as BERT, to evaluate its performance.
+## WikiLingua Dataset
+
+For training and evaluation, we employed the WikiLingua dataset with ~770k article-summary pairs from WikiHow. The dataset includes parallel article-summary pairs in English, enabling cross-language training and assessment.
+
+## Achievements
+
+Our work has yielded significant achievements, including:
+
+- **18th Rank** among 100 competitors in competitive Abstractive Arabic Text Summarization.
+- Achieving a **ROUGE score of 19.2** on Arabic text summarization.
+- Leveraging the **LANS dataset** and optimizing model training through efficient word pre-segmentation.
+- Collaborating on refining data preprocessing pipelines for offline and streaming contexts.
+- Utilizing pretrained models (MT5, Bart, araBart, araBert, Bert2GPT, Bert2Bert) via TensorFlow and Huggingface, coupled with original generative strategies for enhanced summarization.
+- Gaining experience in text preprocessing, research, co-working, hyperparameters tuning, and problem-solving.
 
 ## Future Work
 
-Future work includes further improving the performance of our model by experimenting with different hyperparameters and techniques, such as incorporating additional features or using multi-modal input. Additionally, we plan to explore the use of our model for summarization in other languages.
+Our roadmap for future enhancements includes:
+
+- Further enhancing model performance through hyperparameter tuning and novel techniques.
+- Exploring the incorporation of additional features and multi-modal inputs.
+- Extending our model's utility to summarization tasks in various languages beyond Arabic.
 
 ## Conclusion
 
-In this readme file, we have introduced the problem of summarization and existing work in the field. Our work focuses on developing a summarization model using transformers, and we have outlined our approach and evaluation method. We look forward to contributing to the development of summarization technology and improving the ability of machines to understand and condense text data.
+In this consolidated readme, we've introduced our journey in Arabic text summarization using transformer models. We've discussed the valuable LANS dataset, our summarization approach, evaluation metrics, achievements, and plans for the future. Our commitment to advancing summarization technology and enabling machines to effectively distill text data remains unwavering.
